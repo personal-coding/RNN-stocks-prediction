@@ -33,3 +33,5 @@ I could not generate a consistent 53%+ accuracy model neded to make a profit. So
 2. Again, the data is located [here](https://github.com/ScrapeWithYuri/RNN-stocks-prediction/tree/master/data). The data is ask & bid open, high, low, close and volume data for the ten instruments noted above.
 
 3. You can create a free demo account at [https://demo-login.dukascopy.com/binary/](https://demo-login.dukascopy.com/binary/). Add your username and password [here](https://github.com/ScrapeWithYuri/RNN-stocks-prediction/blob/master/tmp/config.cfg).
+
+4. You'll need ChromeDriver. You can download it [here](https://chromedriver.chromium.org/downloads). Once you've download, update the [config file](https://github.com/ScrapeWithYuri/RNN-stocks-prediction/blob/master/tmp/config.cfg) with its location.
