@@ -19,9 +19,8 @@ WINDOW=int(60*3)
 TIMESTEP=int(30)
 FORECAST=int(60*6)
 TRAIN_TEST_PERCENTAGE=0.90
-MAIN_FILE = 'data/MAIN_1min_onlyFX_min_diff_more_data - Copy Copy.csv'
+MAIN_FILE = 'data/MAIN_1min_onlyFX_min_diff_more_data.csv'
 SAVE_PATH = 'model_1min_onlyFX_no_regime_more_data_balanced.pickle'
-regimes = [0, 1, 2, 3]
 DIFF = 0.00000
 
 bid_ask = ['Ask', 'Bid']
@@ -78,8 +77,6 @@ def reshape_vals(df):
 #Load dataset
 df = pd.read_csv(MAIN_FILE, index_col=False)
 df = df.drop(columns=['Datetime'], axis=1)
-
-#df['Min Diff'] = False
 
 #Make sure we don't include data that spans between weekends - we can't trade these times and they appear to be highly volatile
 min_diff = df['Min Diff'][BREAKPOINT:]
@@ -182,6 +179,7 @@ for column in df:
 
         df[column] = (df[column] - median) / iqr'''
 
+#Using only MinMaxScaler because volume data can be large numbers
 scaler = MinMaxScaler()
 scaler.fit(df[df.columns][MAX:BREAKPOINT])
 df[df.columns] = scaler.transform(df[df.columns])
@@ -203,14 +201,13 @@ print("x data ready")
 
 del test, df, min_diff, xau_ask_volume, scaler
 
+#Creating breakpoints for train and test data
 q = len(xdata)-BREAK
 p = int(q*TRAIN_TEST_PERCENTAGE)
 
 #Create a RF Classifier
-clf = RandomForestClassifier(n_estimators=400, max_features=MAX_FEATURES, criterion='gini', n_jobs=-2, bootstrap=True, #len(df2.columns)
-                             random_state=0, class_weight='balanced') #class_weight='balanced_subsample, max_depth=200
-
-#clf = make_pipeline(FunctionSampler(func=outlier_rejection), clf)
+clf = RandomForestClassifier(n_estimators=400, max_features=MAX_FEATURES, criterion='gini', n_jobs=-2, bootstrap=True,
+                             random_state=0, class_weight='balanced') #BalancedRandomForestClassifier
 
 #Break into training set and testing set
 x_train, x_test, y_train, y_test = xdata[:p], xdata[p:q], ydata[:p], ydata[p:q]
@@ -244,10 +241,12 @@ y_pred = clf.predict(x_test)
 print("Accuracy:",metrics.accuracy_score(y_test, y_pred), str(WINDOW), str(FORECAST))
 print(metrics.classification_report(y_test,y_pred))
 
+#Predict using the x-test data
 y_pred = clf.predict_proba(x_test)
 y_pred2 = clf.predict(x_test)
 to_write = list()
 
+#Write predictions and prediction probabilities to a csv file
 for x, y, z, a, b in zip(y_pred[0], y_pred[1], y_pred[2], y_pred2, y_test):
     new_write = list()
     for i in x:
@@ -271,6 +270,7 @@ del x_test, y_test
 
 write_file(to_write)
 
+#Save the model as a pickle
 #save_model(clf)
 
 del clf

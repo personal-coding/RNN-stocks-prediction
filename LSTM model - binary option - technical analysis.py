@@ -29,7 +29,7 @@ TIMESTEP=int(30)
 FORECAST=int(60*6)
 VALID_PERCENTAGE=0.10
 TRAIN_TEST_PERCENTAGE=0.90 - VALID_PERCENTAGE
-MAIN_FILE = 'data/MAIN_1min_onlyFX_min_diff_more_data - Copy Copy.csv'
+MAIN_FILE = 'data/MAIN_1min_onlyFX_min_diff_more_data.csv'
 SAVE_PATH = 'model_1min_onlyFX_no_regime_more_data_balanced LSTM.pickle'
 DIFF = 0.00000
 
@@ -79,11 +79,6 @@ def window(df, test):
     x_i = np.array(x_i)
     return(x_i)
 
-#This reshapes the x-data into a 2d array
-def reshape_vals(df):
-    nsamples, nx, ny = df.shape
-    return df.reshape((nsamples, nx * ny))
-
 #Load dataset
 df = pd.read_csv(MAIN_FILE, index_col=False)
 df = df.drop(columns=['Datetime'], axis=1)
@@ -132,11 +127,11 @@ for b_a in bid_ask:
 
         # volume ind
         #ad = talib.AD(high, low, close, volume)
-        # adosc = talib.ADOSC(high, low, close, volume, fastperiod=int(TIMESTEP/3), slowperiod=TIMESTEP)
+        #adosc = talib.ADOSC(high, low, close, volume, fastperiod=int(TIMESTEP/3), slowperiod=TIMESTEP)
         df[ticker + b_a + 'volume'] = volume
 
         # volatitility ind
-        # df[ticker + b_a + 'adosc'] = talib.ADOSC(high, low, close, volume, fastperiod=int(TIMESTEP/3), slowperiod=TIMESTEP)
+        #df[ticker + b_a + 'adosc'] = talib.ADOSC(high, low, close, volume, fastperiod=int(TIMESTEP/3), slowperiod=TIMESTEP)
         #df[ticker + b_a + 'ad'] = talib.AD(high, low, close, volume)
         df[ticker + b_a + 'natr'] = talib.NATR(high, low, close, timeperiod=TIMESTEP)
 
@@ -191,6 +186,7 @@ for column in df:
 
         df[column] = (df[column] - median) / iqr'''
 
+#Using only MinMaxScaler because volume data can be large numbers
 scaler = MinMaxScaler()
 scaler.fit(df[df.columns][MAX:BREAKPOINT])
 df[df.columns] = scaler.transform(df[df.columns])
@@ -202,7 +198,7 @@ for column in df:
     else:
         df[column] = df[column].astype(np.uint8)
 
-#Break the the data into a smaller subset to test and train, using a longer dataset to create the normalization
+#Break the the data into a smaller subset to test and train, using a larger dataset to create the normalization
 df = df[BREAKPOINT:]
 df.reset_index(drop=True, inplace=True)
 
@@ -212,6 +208,7 @@ print("x data ready")
 
 del test, df, min_diff, xau_ask_volume, scaler
 
+#Creating breakpoints for train, validation and test data
 q = len(xdata)
 p = int(q*TRAIN_TEST_PERCENTAGE)
 m = int(q*(TRAIN_TEST_PERCENTAGE+VALID_PERCENTAGE))
@@ -221,10 +218,6 @@ x_train, x_valid, x_test, y_train, y_valid, y_test = xdata[:p], xdata[p:m], xdat
 #x_train, x_test, y_train, y_test = xdata[:p], xdata[m:q], ydata[:p], ydata[m:q]
 
 del xdata, ydata
-
-'''#Reshape the x-data into a 2d array
-x_train = reshape_vals(x_train)
-x_test = reshape_vals(x_test)'''
 
 print(x_train.shape[0])
 
@@ -279,14 +272,12 @@ del x_train, y_train
 #Predict the response for test dataset
 y_pred = model.predict(x_test)
 
-# Model Accuracy: how often is the classifier correct?
-'''print("Accuracy:",metrics.accuracy_score(y_test, y_pred), str(WINDOW), str(FORECAST))
-print(metrics.classification_report(y_test,y_pred))'''
-
+#Predict using the x-test data
 y_pred = model.predict_proba(x_test)
 y_pred2 = model.predict_classes(x_test)
 to_write = list()
 
+#Write predictions and prediction probabilities to a csv file
 for z, a, b in zip(y_pred, y_pred2, y_test):
     new_write = list()
 
@@ -301,11 +292,11 @@ for z, a, b in zip(y_pred, y_pred2, y_test):
 
     to_write.append(new_write)
 
-del x_test
-del y_test
+del x_test, y_test
 
 write_file(to_write)
 
+#Save the model as a pickle
 #save_model(model)
 
 del model
