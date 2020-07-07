@@ -1,3 +1,6 @@
+#This code helps line up rows of data by time. I would generally remove rows of data where EUR/USD had zero volume,
+# assuming that this generally meant the data was a weekend or holiday.
+
 import pandas as pd, sys
 
 bid_ask = ['ASK', 'BID']
