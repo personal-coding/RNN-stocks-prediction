@@ -13,15 +13,16 @@ DATA_CSV = r'C:\\Users\\russi\Downloads/EURUSD_Candlestick_1_M_BID_27.06.2020-04
 df = pd.read_csv(MAIN_CSV)
 df2 = pd.read_csv(DATA_CSV)
 
+#Match rows where local time is the same. I would delete zero volume data rows from EUR/USD first.
 filter = df2['Local time'].isin(df['Local time'])
 
 df2[filter == True].to_csv(DATA_CSV)
 
 del df
 
-'''DATA_CSV = r'C:\\Users\\russi\Downloads/EURUSD_Candlestick_1_M_BID_27.06.2020-04.07.2020.csv'
+DATA_CSV = r'C:\\Users\\russi\Downloads/EURUSD_Candlestick_1_M_BID_27.06.2020-04.07.2020.csv'
 df2 = pd.read_csv(DATA_CSV)
-df2[filter == True].to_csv(DATA_CSV)'''
+df2[filter == True].to_csv(DATA_CSV)
 
 DATA_CSV = 'C:\\Users\\russi\Downloads/{0}_Candlestick_1_M_{1}_27.06.2020-04.07.2020.csv'
 
