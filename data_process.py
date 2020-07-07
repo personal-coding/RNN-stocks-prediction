@@ -1,5 +1,6 @@
 #This code helps line up rows of data by time. I would generally remove rows of data where EUR/USD had zero volume,
-# assuming that this generally meant the data was a weekend or holiday.
+# assuming that this generally meant the data was a weekend or holiday. This code would delete those same rows from the
+# other instruments.
 
 import pandas as pd, sys
 
