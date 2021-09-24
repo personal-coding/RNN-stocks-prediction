@@ -4,7 +4,7 @@ The base code started from [@SolbiatiAlessandro](https://github.com/SolbiatiAles
 
 His code scraped the online demo account using Selenium every minute to extract the live data. Also, Selenium is used to click the buy call and buy put buttons in order to execute trades. The issue I found with scraping the webpage for live data is that: 
 
-1. many times the data would skip to the next minute, so inaccurate data was scraped for certain minutes
+1. Many times the data would skip to the next minute, so inaccurate data was scraped for certain minutes
 
 2. The ending minute data shown on the online demo account generally didn't match up with the actual data available from Dukascopy (i.e. if you refreshed the page's data, you'd see different data loaded for historical minutes)
 
