@@ -1,4 +1,4 @@
-# Trying to predict EUR/USD binary and touch options
+# Trying to predict EUR/USD binary options
 
 The base code started from [@SolbiatiAlessandro](https://github.com/SolbiatiAlessandro/RNN-stocks-prediction). SolbiatiAlessandro tried to predict EUR/USD binary options on a Dukascopy demo account. The prediction was created using a RNN based on EUR/USD ask & bid open, high, low, close, volume and spread prices (non-transformed).
 
